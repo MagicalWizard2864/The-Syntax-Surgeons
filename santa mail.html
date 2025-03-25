@@ -1,0 +1,291 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Santa Email App
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet"/>
+ </head>
+ <body class="bg-gray-100 font-roboto">
+  <div class="min-h-screen flex flex-col">
+   <header class="bg-red-600 text-white p-4 flex justify-between items-center">
+    <div class="flex items-center">
+     <img alt="Santa Claus icon with a red hat and white beard" class="h-10 w-10 rounded-full" height="50" src="https://storage.googleapis.com/a1aa/image/ZVbrFugMSYtGYbDpaN1GzfEmxo9Gy0AoQqkiQrKZ9xg.jpg" width="50"/>
+     <h1 class="ml-3 text-2xl font-bold">
+      Santa Email App
+     </h1>
+    </div>
+    <nav class="space-x-4">
+     <a class="hover:underline" href="home.html">
+      Home
+     </a>
+     <a class="hover:underline" href="inbox.html">
+      Inbox
+     </a>
+     <a class="hover:underline" href="sent.html">
+      Sent
+     </a>
+     <a class="hover:underline" href="drafts.html">
+      Drafts
+     </a>
+     <a class="hover:underline" href="trash.html">
+      Trash
+     </a>
+    </nav>
+   </header>
+   <main class="flex-grow container mx-auto p-4">
+    <div class="flex flex-col md:flex-row">
+     <aside class="w-full md:w-1/4 bg-white p-4 rounded-lg shadow-md mb-4 md:mb-0">
+      <button class="w-full bg-red-600 text-white py-2 rounded-lg mb-4 flex items-center justify-center">
+       <i class="fas fa-plus mr-2">
+       </i>
+       Compose
+      </button>
+      <ul class="space-y-2">
+       <li>
+        <a class="flex items-center p-2 text-gray-700 hover:bg-gray-200 rounded-lg" href="inbox.html">
+         <i class="fas fa-inbox mr-2">
+         </i>
+         Inbox
+        </a>
+       </li>
+       <li>
+        <a class="flex items-center p-2 text-gray-700 hover:bg-gray-200 rounded-lg" href="sent.html">
+         <i class="fas fa-paper-plane mr-2">
+         </i>
+         Sent
+        </a>
+       </li>
+       <li>
+        <a class="flex items-center p-2 text-gray-700 hover:bg-gray-200 rounded-lg" href="drafts.html">
+         <i class="fas fa-file-alt mr-2">
+         </i>
+         Drafts
+        </a>
+       </li>
+       <li>
+        <a class="flex items-center p-2 text-gray-700 hover:bg-gray-200 rounded-lg" href="trash.html">
+         <i class="fas fa-trash mr-2">
+         </i>
+         Trash
+        </a>
+       </li>
+      </ul>
+     </aside>
+     <section class="w-full md:w-3/4 bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-xl font-bold mb-4">
+       Inbox
+      </h2>
+      <ul class="space-y-4">
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Letter from Elf
+         </h3>
+         <p class="text-gray-600">
+          Hey Santa, we need more candy canes...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Dec 1
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Christmas Preparations
+         </h3>
+         <p class="text-gray-600">
+          All set for the big night...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 30
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Gift List Update
+         </h3>
+         <p class="text-gray-600">
+          Here's the updated list of gifts...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 29
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Naughty or Nice List
+         </h3>
+         <p class="text-gray-600">
+          Please review the latest list...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 28
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Workshop Supplies
+         </h3>
+         <p class="text-gray-600">
+          We need more wrapping paper...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 27
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Reindeer Training
+         </h3>
+         <p class="text-gray-600">
+          The reindeers are ready for the flight...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 26
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Christmas Eve Schedule
+         </h3>
+         <p class="text-gray-600">
+          Here's the schedule for Christmas Eve...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 25
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Toy Production
+         </h3>
+         <p class="text-gray-600">
+          Production is on track...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 24
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Elf Meeting Minutes
+         </h3>
+         <p class="text-gray-600">
+          Here are the minutes from the last meeting...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 23
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Sleigh Maintenance
+         </h3>
+         <p class="text-gray-600">
+          The sleigh is ready for the journey...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 22
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Cookie Preferences
+         </h3>
+         <p class="text-gray-600">
+          Santa, what kind of cookies do you prefer...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 21
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Elf Uniforms
+         </h3>
+         <p class="text-gray-600">
+          We need new uniforms for the elves...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 20
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Christmas Tree
+         </h3>
+         <p class="text-gray-600">
+          The tree is decorated and ready...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 19
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Holiday Music
+         </h3>
+         <p class="text-gray-600">
+          The playlist is ready...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 18
+        </span>
+       </li>
+       <li class="p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+         <h3 class="text-lg font-bold">
+          Re: Christmas Lights
+         </h3>
+         <p class="text-gray-600">
+          The lights are up and shining...
+         </p>
+        </div>
+        <span class="text-gray-500">
+         Nov 17
+        </span>
+       </li>
+      </ul>
+     </section>
+    </div>
+   </main>
+   <!-- Footer -->
+   <footer class="bg-red-600 text-white p-4 text-center">
+    <p>
+     © 2023 Santa Email App. All rights reserved.
+    </p>
+   </footer>
+  </div>
+ </body>
+</html>

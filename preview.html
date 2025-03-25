@@ -1,0 +1,418 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Santa Email</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Roboto', sans-serif; background: #f4f4f9; margin: 0; }
+    .header { background: #dc2626; color: white; padding: 12px 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .sidebar { background: #ffffff; border-right: 1px solid #e5e7eb; width: 260px; flex-shrink: 0; transition: transform 0.3s ease; }
+    .sidebar-mobile { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); z-index: 1000; }
+    .sidebar-mobile.open { transform: translateX(0); }
+    .email-list { background: #ffffff; border-right: 1px solid #e5e7eb; }
+    .email-detail { background: #ffffff; }
+    .email-item { padding: 15px 20px; border-bottom: 1px solid #e5e7eb; transition: background 0.2s; cursor: pointer; }
+    .email-item:hover { background: #f1f5f9; }
+    .email-item.active { background: #e5e7eb; border-left: 4px solid #16a34a; }
+    .unread { font-weight: 600; }
+    .read { color: #4b5563; }
+    .modal { transition: transform 0.3s ease, opacity 0.3s ease; transform: translateY(-100%); position: fixed; top: 0; left: 0; right: 0; margin: auto; width: 100%; max-width: 500px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; border-radius: 8px; opacity: 0; }
+    .modal.open { transform: translateY(10%); opacity: 1; }
+    .backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+    .backdrop.open { display: block; }
+    .dropdown { display: none; position: absolute; top: 100%; right: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 200px; }
+    .profile:hover .dropdown { display: block; }
+    .action-buttons { opacity: 0; transition: opacity 0.2s; }
+    .email-item:hover .action-buttons { opacity: 1; }
+    .theme-dark { background: #1f2937; color: #f9fafb; }
+    .theme-dark .header { background: #991b1b; }
+    .theme-dark .sidebar, .theme-dark .email-list, .theme-dark .email-detail, .theme-dark .modal { background: #374151; }
+    .theme-dark .email-item { border-color: #4b5563; }
+    .theme-dark .email-item:hover { background: #4b5563; }
+    .theme-dark .email-item.active { background: #6b7280; }
+    .theme-dark .read { color: #d1d5db; }
+  </style>
+</head>
+<body>
+  <div class="flex flex-col h-screen">
+    <!-- Header -->
+    <header class="header flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" class="text-white md:hidden focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Toggle sidebar">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        <img id="headerAvatar" src="https://storage.googleapis.com/a1aa/image/ZVbrFugMSYtGYbDpaN1GzfEmxo9Gy0AoQqkiQrKZ9xg.jpg" loading="lazy" alt="Santa Icon" class="h-10 w-10 rounded-full"/>
+        <h1 class="text-2xl font-bold">Santa Email</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <input type="text" id="searchBar" placeholder="Search mail" class="p-2 rounded-full text-black w-80 border border-gray-300 hidden md:block focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Search emails"/>
+        <div class="relative profile">
+          <button class="flex items-center space-x-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Profile menu">
+            <img id="profileAvatar" src="https://storage.googleapis.com/a1aa/image/ZVbrFugMSYtGYbDpaN1GzfEmxo9Gy0AoQqkiQrKZ9xg.jpg" loading="lazy" alt="Santa" class="h-10 w-10 rounded-full"/>
+            <span id="profileName" class="hidden md:inline">Santa Claus</span>
+          </button>
+          <div class="dropdown p-2">
+            <a href="#" id="viewProfileBtn" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">View Profile</a>
+            <a href="#" id="settingsBtn" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Settings</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex flex-1 overflow-hidden">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar p-4 hidden md:block sidebar-mobile md:sidebar-mobile-none" role="navigation" aria-label="Email navigation">
+        <button id="composeBtn" class="w-full bg-green-600 text-white py-3 px-4 rounded-md mb-6 hover:bg-green-700 flex items-center text-base focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Compose new email">
+          <i class="fas fa-plus mr-2"></i> Compose
+        </button>
+        <ul class="space-y-2">
+          <li><a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"><i class="fas fa-inbox mr-3 text-red-600 w-5"></i> Inbox <span id="unreadCount" class="ml-auto bg-red-500 text-white rounded-full px-2 py-1 text-xs">3</span></a></li>
+          <li><a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"><i class="fas fa-star mr-3 text-yellow-500 w-5"></i> Starred</a></li>
+          <li><a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"><i class="fas fa-paper-plane mr-3 text-green-600 w-5"></i> Sent</a></li>
+          <li><a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"><i class="fas fa-file-alt mr-3 text-gray-500 w-5"></i> Drafts</a></li>
+          <li><a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"><i class="fas fa-trash mr-3 text-red-600 w-5"></i> Trash</a></li>
+        </ul>
+      </aside>
+
+      <!-- Email Section -->
+      <div class="flex-1 flex flex-col md:flex-row">
+        <!-- Email List -->
+        <div class="email-list w-full md:w-1/3 p-4 overflow-y-auto" role="listbox" aria-label="Email list">
+          <div class="flex justify-between items-center mb-4">
+            <select id="filterEmails" class="p-2 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Filter emails">
+              <option value="all">All</option>
+              <option value="unread">Unread</option>
+              <option value="starred">Starred</option>
+            </select>
+            <div class="flex space-x-3">
+              <button class="p-3 text-gray-600 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500" aria-label="Delete selected"><i class="fas fa-trash text-lg"></i></button>
+              <button class="p-3 text-gray-600 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Reply to selected"><i class="fas fa-reply text-lg"></i></button>
+            </div>
+          </div>
+          <ul id="emailList" class="space-y-0">
+            <li class="email-item flex items-center unread hover:bg-gray-50 transition-all duration-200" data-id="1" tabindex="0" role="option" aria-selected="false">
+              <input type="checkbox" class="mr-4 focus:ring-green-500" aria-label="Select email"/>
+              <img src="https://via.placeholder.com/32" loading="lazy" alt="Elf Avatar" class="h-10 w-10 rounded-full mr-4"/>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-base truncate">Elf</span>
+                  <span class="text-sm text-gray-600">Dec 1</span>
+                </div>
+                <p class="text-base text-gray-800 truncate">Letter from Elf - We need more candy canes...</p>
+              </div>
+              <div class="action-buttons flex space-x-3 ml-4 opacity-0 hover:opacity-100 transition-opacity duration-200">
+                <button class="p-3 text-gray-600 hover:text-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" aria-label="Star email"><i class="fas fa-star text-lg"></i></button>
+                <button class="p-3 text-gray-600 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Reply"><i class="fas fa-reply text-lg"></i></button>
+                <button class="p-3 text-gray-600 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500" aria-label="Delete"><i class="fas fa-trash text-lg"></i></button>
+              </div>
+            </li>
+            <li class="email-item flex items-center read hover:bg-gray-50 transition-all duration-200" data-id="2" tabindex="0" role="option" aria-selected="false">
+              <input type="checkbox" class="mr-4 focus:ring-green-500" aria-label="Select email"/>
+              <img src="https://via.placeholder.com/32" loading="lazy" alt="Team Avatar" class="h-10 w-10 rounded-full mr-4"/>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center">
+                  <span class="text-base truncate">Team</span>
+                  <span class="text-sm text-gray-600">Nov 30</span>
+                </div>
+                <p class="text-base text-gray-700 truncate">Re: Christmas Prep - All set for the big night...</p>
+              </div>
+              <div class="action-buttons flex space-x-3 ml-4 opacity-0 hover:opacity-100 transition-opacity duration-200">
+                <button class="p-3 text-gray-600 hover:text-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" aria-label="Star email"><i class="fas fa-star text-lg"></i></button>
+                <button class="p-3 text-gray-600 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Reply"><i class="fas fa-reply text-lg"></i></button>
+                <button class="p-3 text-gray-600 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500" aria-label="Delete"><i class="fas fa-trash text-lg"></i></button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Email Detail -->
+        <div id="emailDetail" class="email-detail w-full md:w-2/3 p-6 overflow-y-auto hidden transition-opacity duration-300" role="main" aria-label="Email content">
+          <div class="flex justify-between items-center mb-6">
+            <h2 id="detailSubject" class="text-xl font-bold truncate">Letter from Elf</h2>
+            <div class="flex space-x-3">
+              <button class="p-3 text-gray-600 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Reply"><i class="fas fa-reply text-lg"></i></button>
+              <button class="p-3 text-gray-600 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500" aria-label="Delete"><i class="fas fa-trash text-lg"></i></button>
+              <button class="p-3 text-gray-600 hover:text-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" aria-label="Star"><i class="fas fa-star text-lg"></i></button>
+            </div>
+          </div>
+          <div class="flex items-center mb-6">
+            <img src="https://via.placeholder.com/32" loading="lazy" alt="Elf Avatar" class="h-12 w-12 rounded-full mr-4"/>
+            <div>
+              <p class="font-semibold text-base">Elf <span class="text-sm text-gray-600"><<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c5">[email protected]</a>></span></p>
+              <p class="text-sm text-gray-600">To: Santa Claus | Dec 1, 2023, 10:30 AM</p>
+            </div>
+          </div>
+          <p id="detailBody" class="text-gray-800 text-base mb-6">Hey Santa, we need more candy canes in the workshop ASAP! The elves are running low, and the kids are expecting their treats. Thanks!</p>
+          <div class="border-t pt-4">
+            <button class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-base">Reply</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Compose Drawer -->
+    <div id="backdrop" class="backdrop"></div>
+    <div id="composeDrawer" class="modal p-6" aria-label="Compose new email">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">New Message</h2>
+        <button id="closeDrawer" class="text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500" aria-label="Close compose drawer"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <input type="text" placeholder="To" class="w-full p-3 mb-4 border rounded-md text-base focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Recipient"/>
+      <input type="text" placeholder="Subject" class="w-full p-3 mb-4 border rounded-md text-base focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Subject"/>
+      <textarea placeholder="Type your message..." class="w-full p-4 mb-4 border rounded-md h-72 text-base focus:outline-none focus:ring-2 focus:ring-green-500" aria-label="Message body"></textarea>
+      <div class="flex justify-end space-x-3">
+        <button id="discardBtn" class="bg-gray-500 text-white py-3 px-6 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 text-base">Discard</button>
+        <button id="sendBtn" class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-base flex items-center">
+          <span>Send</span>
+          <i class="fas fa-spinner fa-spin ml-2 hidden"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal p-6" aria-label="User profile">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Profile</h2>
+        <button id="closeProfile" class="text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500" aria-label="Close profile"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <div class="flex items-center mb-6">
+        <img id="profileModalAvatar" src="https://storage.googleapis.com/a1aa/image/ZVbrFugMSYtGYbDpaN1GzfEmxo9Gy0AoQqkiQrKZ9xg.jpg" loading="lazy" alt="Santa Avatar" class="h-16 w-16 rounded-full mr-4"/>
+        <div>
+          <input id="profileNameInput" type="text" class="text-lg font-semibold border-b border-gray-300 focus:outline-none focus:border-green-500" value="Santa Claus"/>
+          <p id="profileEmail" class="text-sm text-gray-600">[email protected]</p>
+        </div>
+      </div>
+      <textarea id="profileBio" class="w-full p-3 mb-4 border rounded-md text-base focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Tell us about yourself..." rows="4">Jolly old man from the North Pole, delivering joy every Christmas!</textarea>
+      <div class="flex justify-end">
+        <button id="saveProfile" class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-base">Save</button>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal p-6" aria-label="Settings">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Settings</h2>
+        <button id="closeSettings" class="text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500" aria-label="Close settings"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <div class="space-y-6">
+        <div>
+          <label class="block text-base font-medium mb-2">Theme</label>
+          <select id="themeSelect" class="w-full p-2 border rounded-md text-base focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-base font-medium mb-2">Email Signature</label>
+          <textarea id="signature" class="w-full p-3 border rounded-md text-base focus:outline-none focus:ring-2 focus:ring-green-500" rows="3">Ho Ho Ho! ~ Santa</textarea>
+        </div>
+        <div>
+          <label class="flex items-center text-base">
+            <input id="notifications" type="checkbox" class="mr-2 focus:ring-green-500" checked/>
+            Enable Notifications
+          </label>
+        </div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button id="saveSettings" class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-base">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script>
+    // User Data (Simulated)
+    let user = JSON.parse(localStorage.getItem('santaUser')) || {
+      name: 'Santa Claus',
+      email: '[email protected]',
+      avatar: 'https://storage.googleapis.com/a1aa/image/ZVbrFugMSYtGYbDpaN1GzfEmxo9Gy0AoQqkiQrKZ9xg.jpg',
+      bio: 'Jolly old man from the North Pole, delivering joy every Christmas!',
+      settings: { theme: 'light', signature: 'Ho Ho Ho! ~ Santa', notifications: true }
+    };
+
+    // Modal Management
+    const backdrop = document.getElementById('backdrop');
+    const showModal = (modalId) => {
+      document.getElementById(modalId).classList.add('open');
+      backdrop.classList.add('open');
+    };
+    const hideModal = (modalId) => {
+      document.getElementById(modalId).classList.remove('open');
+      backdrop.classList.remove('open');
+    };
+
+    // Sidebar Toggle
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebar.classList.toggle('hidden');
+    });
+
+    // Compose Drawer
+    const composeBtn = document.getElementById('composeBtn');
+    const composeDrawer = document.getElementById('composeDrawer');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const discardBtn = document.getElementById('discardBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    composeBtn.addEventListener('click', () => showModal('composeDrawer'));
+    closeDrawer.addEventListener('click', () => hideModal('composeDrawer'));
+    discardBtn.addEventListener('click', () => hideModal('composeDrawer'));
+    backdrop.addEventListener('click', () => {
+      hideModal('composeDrawer');
+      hideModal('profileModal');
+      hideModal('settingsModal');
+    });
+    sendBtn.addEventListener('click', () => {
+      const spinner = sendBtn.querySelector('.fa-spinner');
+      sendBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      setTimeout(() => {
+        sendBtn.disabled = false;
+        spinner.classList.add('hidden');
+        hideModal('composeDrawer');
+      }, 1000);
+    });
+
+    // Profile Modal
+    const viewProfileBtn = document.getElementById('viewProfileBtn');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfile = document.getElementById('closeProfile');
+    const saveProfile = document.getElementById('saveProfile');
+    const profileNameInput = document.getElementById('profileNameInput');
+    const profileBio = document.getElementById('profileBio');
+    viewProfileBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      profileNameInput.value = user.name;
+      profileBio.value = user.bio;
+      document.getElementById('profileModalAvatar').src = user.avatar;
+      document.getElementById('profileEmail').textContent = user.email;
+      showModal('profileModal');
+    });
+    closeProfile.addEventListener('click', () => hideModal('profileModal'));
+    saveProfile.addEventListener('click', () => {
+      user.name = profileNameInput.value;
+      user.bio = profileBio.value;
+      localStorage.setItem('santaUser', JSON.stringify(user));
+      updateUserUI();
+      hideModal('profileModal');
+    });
+
+    // Settings Modal
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettings = document.getElementById('closeSettings');
+    const saveSettings = document.getElementById('saveSettings');
+    const themeSelect = document.getElementById('themeSelect');
+    const signature = document.getElementById('signature');
+    const notifications = document.getElementById('notifications');
+    settingsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      themeSelect.value = user.settings.theme;
+      signature.value = user.settings.signature;
+      notifications.checked = user.settings.notifications;
+      showModal('settingsModal');
+    });
+    closeSettings.addEventListener('click', () => hideModal('settingsModal'));
+    saveSettings.addEventListener('click', () => {
+      user.settings.theme = themeSelect.value;
+      user.settings.signature = signature.value;
+      user.settings.notifications = notifications.checked;
+      localStorage.setItem('santaUser', JSON.stringify(user));
+      applySettings();
+      hideModal('settingsModal');
+    });
+
+    // Update UI with User Data
+    function updateUserUI() {
+      document.getElementById('profileName').textContent = user.name;
+      document.getElementById('profileAvatar').src = user.avatar;
+      document.getElementById('headerAvatar').src = user.avatar;
+    }
+
+    // Apply Settings
+    function applySettings() {
+      document.body.classList.toggle('theme-dark', user.settings.theme === 'dark');
+    }
+
+    // Initial Setup
+    updateUserUI();
+    applySettings();
+
+    // Email Detail View
+    const emailList = document.getElementById('emailList');
+    const emailDetail = document.getElementById('emailDetail');
+    const detailSubject = document.getElementById('detailSubject');
+    const detailBody = document.getElementById('detailBody');
+    emailList.addEventListener('click', (e) => {
+      const email = e.target.closest('.email-item');
+      if (!email || e.target.type === 'checkbox' || e.target.tagName === 'BUTTON' || e.target.tagName === 'I') return;
+      document.querySelectorAll('.email-item').forEach(e => {
+        e.classList.remove('active');
+        e.setAttribute('aria-selected', 'false');
+      });
+      email.classList.add('active');
+      email.setAttribute('aria-selected', 'true');
+      email.classList.remove('unread');
+      emailDetail.classList.remove('hidden');
+      emailDetail.style.opacity = '0';
+      setTimeout(() => emailDetail.style.opacity = '1', 10);
+      detailSubject.textContent = email.querySelector('p').textContent.split(' - ')[0];
+      detailBody.textContent = email.dataset.id === '1' ? 'Hey Santa, we need more candy canes in the workshop ASAP! The elves are running low, and the kids are expecting their treats. Thanks!' : 'All set for the big night. The sleigh is polished, and the gifts are wrapped!';
+    });
+
+    // Search Functionality (Debounced)
+    const searchBar = document.getElementById('searchBar');
+    let searchTimeout;
+    searchBar.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const searchTerm = searchBar.value.toLowerCase();
+        const emails = emailList.getElementsByTagName('li');
+        Array.from(emails).forEach(email => {
+          const text = email.textContent.toLowerCase();
+          email.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+      }, 300);
+    });
+
+    // Filter Emails
+    const filterEmails = document.getElementById('filterEmails');
+    filterEmails.addEventListener('change', (e) => {
+      const filter = e.target.value;
+      const emails = emailList.getElementsByTagName('li');
+      Array.from(emails).forEach(email => {
+        email.style.display = filter === 'all' ? '' : 
+          (filter === 'unread' && email.classList.contains('unread')) || 
+          (filter === 'starred' && email.querySelector('.fa-star')?.classList.contains('fas')) ? '' : 'none';
+      });
+    });
+
+    // Star Email
+    emailList.addEventListener('click', (e) => {
+      const star = e.target.closest('.fa-star');
+      if (!star) return;
+      star.classList.toggle('fas');
+      star.classList.toggle('far');
+      star.classList.toggle('text-yellow-500');
+      star.classList.toggle('text-gray-600');
+    });
+
+    // Keyboard Navigation
+    document.querySelectorAll('.email-item').forEach(item => {
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
