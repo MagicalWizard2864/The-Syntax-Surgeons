@@ -1,22 +1,3 @@
-#old code from quant.py
-import yfinance as yf
-import matplotlib.pyplot as plt
-
-df = yf.download("AAPL", start="2024-01-01", end="2024-12-31")
-
-print(df.head())
-
-# Plot the closing price
-plt.figure(figsize=(10, 5))
-plt.plot(df.index, df['Close'], label='AAPL Close Price')
-plt.xlabel('Date')
-plt.ylabel('Close Price (USD)')
-plt.title('AAPL Closing Price in 2024')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-#upated code from quant.py file
 import yfinance as yf
 import matplotlib.pyplot as plt
 
@@ -134,4 +115,3 @@ plt.plot(df2.index, df2['Volatility'], label='NFLX Volatility')
 plt.legend()
 plt.grid(True)
 
-#in this code every visulization works and no errors fount in this 

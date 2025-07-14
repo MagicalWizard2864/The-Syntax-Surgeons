@@ -1,0 +1,160 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Elbow: Virtual Reality World</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a202c, #2d3748);
+            min-height: 100vh;
+        }
+        .gallery-item {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .gallery-item:hover .overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <header class="bg-gray-800 p-4 sticky top-0 z-10 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                Elbow: Virtual Reality World
+            </h1>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="home.html" class="hover:text-blue-400 transition-colors duration-300">Home</a></li>
+                    <li><a href="about.html" class="hover:text-blue-400 transition-colors duration-300">About</a></li>
+                    <li><a href="gallery.html" class="hover:text-blue-400 transition-colors duration-300">Gallery</a></li>
+                    <li><a href="contact.html" class="hover:text-blue-400 transition-colors duration-300">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <section class="mb-12">
+            <div class="flex justify-center items-center gap-4">
+                <input id="searchInput" type="text" 
+                       class="w-full max-w-lg p-3 rounded-lg bg-gray-800 border border-gray-700 text-white 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                       transition-all duration-300" 
+                       placeholder="Search VR experiences..."/>
+                <button id="searchButton" 
+                        class="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg 
+                        hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 
+                        focus:ring-blue-500 transition-all duration-300">
+                    <i class="fas fa-search"></i>
+                </button>
+                <select id="sortSelect" 
+                        class="p-3 rounded-lg bg-gray-800 border border-gray-700 text-white 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="default">Sort By</option>
+                    <option value="name">Name A-Z</option>
+                    <option value="name-desc">Name Z-A</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gallery">
+            <div class="gallery-item bg-gray-800 rounded-lg shadow-lg">
+                <a href="futuristic.html">
+                    <img src="https://storage.googleapis.com/a1aa/image/FIBmXAYPeqRkZSseA5ejCzoJnfA1jfIzjh0OqEYNbuWgiNSeE.jpg" 
+                         alt="Futuristic Cityscape" 
+                         class="w-full h-64 object-cover rounded-t-lg">
+                    <div class="p-4">
+                        <h2 class="text-xl font-bold mb-2">Futuristic Cityscape</h2>
+                        <p class="text-gray-300">Explore towering skyscrapers and advanced tech</p>
+                    </div>
+                    <div class="overlay">
+                        <button class="w-full py-2 bg-blue-500 rounded hover:bg-blue-600 transition-colors">
+                            Preview in VR
+                        </button>
+                    </div>
+                </a>
+            </div>
+            <!-- Repeat similar structure for other gallery items -->
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 p-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">© 2025 Virtual Reality World. All Rights Reserved.</p>
+            <div class="mt-4 flex justify-center gap-6">
+                <a href="#" class="text-gray-400 hover:text-blue-400"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-400"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-400"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced search functionality
+        const searchButton = document.getElementById('searchButton');
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const gallery = document.getElementById('gallery');
+        const items = Array.from(gallery.children);
+
+        function filterAndSort() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let filteredItems = items.filter(item => {
+                const title = item.querySelector('h2').textContent.toLowerCase();
+                return title.includes(searchTerm);
+            });
+
+            const sortValue = sortSelect.value;
+            if (sortValue === 'name') {
+                filteredItems.sort((a, b) => 
+                    a.querySelector('h2').textContent.localeCompare(b.querySelector('h2').textContent));
+            } else if (sortValue === 'name-desc') {
+                filteredItems.sort((a, b) => 
+                    b.querySelector('h2').textContent.localeCompare(a.querySelector('h2').textContent));
+            }
+
+            gallery.innerHTML = '';
+            filteredItems.forEach(item => gallery.appendChild(item));
+        }
+
+        searchButton.addEventListener('click', filterAndSort);
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') filterAndSort();
+        });
+        sortSelect.addEventListener('change', filterAndSort);
+
+        // Add smooth scroll to top
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                if (!document.querySelector('.scroll-top')) {
+                    const btn = document.createElement('button');
+                    btn.className = 'scroll-top fixed bottom-8 right-8 p-3 bg-blue-500 rounded-full';
+                    btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+                    document.body.appendChild(btn);
+                }
+            } else {
+                document.querySelector('.scroll-top')?.remove();
+            }
+        });
+    </script>
+</body>
+</html>

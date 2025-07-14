@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="AI-powered financial assistant for investment management">
+    <title>AI Financial Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0EA5E9',
+                        secondary: '#10B981',
+                        error: '#EF4444'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js" defer></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        .chart-container { min-height: 300px; width: 100%; }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        [data-error] { border-color: #EF4444; }
+        .loading-spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-['Roboto'] antialiased">
+    <nav class="bg-white shadow-sm fixed w-full z-10 top-0" role="navigation" aria-label="Main navigation">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-['Pacifico'] text-primary" aria-label="Brand logo">logo</span>
+                    <div class="hidden md:flex items-center space-x-8 ml-10">
+                        <a href="#" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200" aria-current="page">Dashboard</a>
+                        <a href="#" class="text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200">Portfolio</a>
+                        <a href="#" class="text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200">Analysis</a>
+                        <a href="#" class="text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200">AI Assistant</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 rounded-full text-gray-500 hover:text-primary transition-colors duration-200" aria-label="Notifications">
+                        <div class="w-6 h-6 flex items-center justify-center">
+                            <i class="ri-notification-3-line"></i>
+                        </div>
+                    </button>
+                    <div class="relative">
+                        <button class="flex items-center space-x-2" onclick="toggleUserMenu()" aria-label="User menu" aria-haspopup="true">
+                            <img class="h-8 w-8 rounded-full" src="https://public.readdy.ai/ai/img_res/9d5f946506d88ec6da125de59eb06442.jpg" alt="User profile picture">
+                            <span class="hidden md:block text-sm font-medium text-gray-700">Alexander Mitchell</span>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1" role="menu">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Settings</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <section class="bg-white rounded-lg shadow-sm p-6" aria-labelledby="ai-assistant-title">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 id="ai-assistant-title" class="text-xl font-semibold text-gray-900">AI Assistant</h2>
+                        <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200" onclick="clearChat()">Clear Chat</button>
+                    </div>
+                    <div class="h-96 overflow-y-auto mb-4 space-y-4 p-2 bg-gray-50 rounded-lg" id="chatContainer" role="log" aria-live="polite"></div>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="chatInput" 
+                            class="w-full border border-gray-200 rounded-lg pl-4 pr-12 py-3 focus:outline-none focus:border-primary text-sm transition-colors duration-200" 
+                            placeholder="Ask about market trends, investment advice, or portfolio analysis..."
+                            aria-label="Chat input"
+                        >
+                        <button 
+                            onclick="sendMessage()" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80 transition-colors duration-200" 
+                            aria-label="Send message"
+                        >
+                            <div class="w-6 h-6 flex items-center justify-center">
+                                <i class="ri-send-plane-line"></i>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-lg shadow-sm p-6" aria-labelledby="portfolio-title">
+                    <h2 id="portfolio-title" class="text-xl font-semibold text-gray-900 mb-6">Portfolio Performance</h2>
+                    <div class="chart-container" id="portfolioChart" role="figure" aria-label="Portfolio performance chart"></div>
+                </section>
+            </div>
+
+            <div class="space-y-6">
+                <section class="bg-white rounded-lg shadow-sm p-6" aria-labelledby="quick-actions-title">
+                    <h2 id="quick-actions-title" class="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-primary transition-all duration-200 group" aria-label="Trade">
+                            <div class="w-8 h-8 flex items-center justify-center text-gray-500 group-hover:text-primary mb-2">
+                                <i class="ri-exchange-line"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Trade</span>
+                        </button>
+                        <!-- Similar improvements for other buttons -->
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-lg shadow-sm p-6" aria-labelledby="market-insights-title">
+                    <h2 id="market-insights-title" class="text-xl font-semibold text-gray-900 mb-6">Market Insights</h2>
+                    <div class="space-y-4" role="list">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg" role="listitem">
+                            <div class="w-8 h-8 flex items-center justify-center text-green-500">
+                                <i class="ri-arrow-up-line"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">S&P 500</h3>
+                                <p class="text-sm text-gray-500">+1.2% (4,927.25)</p>
+                            </div>
+                        </div>
+                        <!-- Similar improvements for other market items -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Constants and Initial Data
+        const mockData = {
+            portfolioPerformance: [
+                { date: '2025-01', value: 100000 },
+                { date: '2025-02', value: 105000 },
+                { date: '2025-03', value: 108000 },
+                { date: '2025-04', value: 112000 },
+                { date: '2025-05', value: 115000 },
+                { date: '2025-06', value: 118000 }
+            ]
+        };
+
+        // Chart Initialization
+        function initializeChart() {
+            try {
+                const portfolioChart = echarts.init(document.getElementById('portfolioChart'));
+                const portfolioOption = {
+                    animation: true,
+                    animationDuration: 1000,
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderColor: '#e5e7eb',
+                        textStyle: { color: '#1f2937' }
+                    },
+                    grid: { top: 20, right: 20, bottom: 40, left: 60 },
+                    xAxis: {
+                        type: 'category',
+                        data: mockData.portfolioPerformance.map(item => item.date),
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#1f2937', rotate: 45 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { 
+                            color: '#1f2937',
+                            formatter: value => '$' + value.toLocaleString()
+                        }
+                    },
+                    series: [{
+                        data: mockData.portfolioPerformance.map(item => item.value),
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: { color: 'rgba(87, 181, 231, 1)', width: 2 },
+                        itemStyle: { color: '#0EA5E9' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: 'rgba(87, 181, 231, 0.2)'
+                            }, {
+                                offset: 1,
+                                color: 'rgba(87, 181, 231, 0)'
+                            }])
+                        }
+                    }]
+                };
+                portfolioChart.setOption(portfolioOption);
+                window.addEventListener('resize', () => portfolioChart.resize());
+            } catch (error) {
+                console.error('Chart initialization failed:', error);
+            }
+        }
+
+        // Chat Functionality
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            const chatContainer = document.getElementById('chatContainer');
+            
+            if (!message) {
+                input.classList.add('border-error');
+                setTimeout(() => input.classList.remove('border-error'), 2000);
+                return;
+            }
+
+            // User message
+            chatContainer.insertAdjacentHTML('beforeend', `
+                <div class="flex items-start space-x-3 justify-end animate-fade-in">
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-900 bg-primary/10 rounded-lg p-3 ml-12">${message}</p>
+                    </div>
+                </div>
+            `);
+
+            // Show loading state
+            const loading = chatContainer.insertAdjacentHTML('beforeend', `
+                <div class="flex items-start space-x-3 animate-fade-in">
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="ri-robot-line text-primary"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-900 bg-gray-50 rounded-lg p-3">
+                            <span class="loading-spinner inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></span>
+                            Analyzing...
+                        </p>
+                    </div>
+                </div>
+            `);
+
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                chatContainer.lastElementChild.remove();
+                chatContainer.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-start space-x-3 animate-fade-in">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <i class="ri-robot-line text-primary"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-900 bg-gray-50 rounded-lg p-3">I'm analyzing your request about "${message}". Here's my analysis based on current market data as of ${new Date().toLocaleDateString()}.</p>
+                        </div>
+                    </div>
+                `);
+            } catch (error) {
+                chatContainer.lastElementChild.remove();
+                chatContainer.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-start space-x-3 animate-fade-in">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <i class="ri-robot-line text-primary"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-error bg-gray-50 rounded-lg p-3">Sorry, there was an error processing your request. Please try again.</p>
+                        </div>
+                    </div>
+                `);
+            }
+
+            input.value = '';
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        function clearChat() {
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = '';
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeChart();
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            // Close user menu when clicking outside
+            document.addEventListener('click', (e) => {
+                const menu = document.getElementById('userMenu');
+                const button = document.querySelector('button[onclick="toggleUserMenu()"]');
+                if (!menu.contains(e.target) && !button.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
